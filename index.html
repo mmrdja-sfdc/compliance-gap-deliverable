@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Close the Compliance Gap</title>
+  <style>
+    :root {
+      --ink: #0f1c2e;
+      --muted: #5c6b7e;
+      --line: #e4e9f0;
+      --paper: #f6f8fb;
+      --card: #ffffff;
+      --accent: #0b5fff;
+      --accent-soft: #e8f0ff;
+      --warn: #8a4b08;
+      --warn-bg: #fff6ea;
+      --ok: #0e6b45;
+      --shadow: 0 8px 28px rgba(15, 28, 46, 0.06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Salesforce Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.45;
+    }
+    header {
+      background: var(--ink);
+      color: white;
+      padding: 48px 24px 36px;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+    header h1 { margin: 0 0 8px; font-size: 36px; letter-spacing: -0.03em; }
+    header p { margin: 0; max-width: 640px; color: #d5deea; font-size: 18px; }
+    .lede { margin-top: 18px; font-size: 14px; color: #b7c4d6; }
+    main { padding: 28px 24px 64px; }
+    h2 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    button.chip {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button.chip[aria-pressed="true"] {
+      background: var(--ink);
+      color: white;
+      border-color: var(--ink);
+    }
+    .split { margin-top: 18px; font-size: 14px; color: var(--muted); }
+    .split strong { color: var(--ink); }
+    .grid { display: grid; gap: 14px; margin-top: 22px; }
+    article.card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 18px 16px;
+      box-shadow: var(--shadow);
+    }
+    .card-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+    .area { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+    .product {
+      font-size: 13px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+    h3 { margin: 8px 0 6px; font-size: 20px; letter-spacing: -0.02em; }
+    .cite { color: var(--muted); font-size: 14px; margin: 0 0 10px; }
+    .value { margin: 0; font-size: 16px; }
+    .ask {
+      margin-top: 12px;
+      background: var(--warn-bg);
+      color: var(--warn);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .ask span { font-weight: 700; }
+    footer.note {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .empty { color: var(--muted); margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Close the Compliance Gap</h1>
+      <p>You have the policy. You can't produce the proof.</p>
+      <p class="lede">Pick the standard in your deadline. Each card is one thing they will ask you to show, and the Salesforce product that produces it — only if you can't already.</p>
+    </div>
+  </header>
+  <main>
+    <div class="wrap">
+      <h2>Your deadline</h2>
+      <div class="chips" id="chips"></div>
+      <p class="split"><strong>Salesforce operates</strong> the platform. <strong>You operate</strong> who sees which records, how long history is kept, backup and restore tests, keys you manage, and what your users, integrations, and agents did.</p>
+      <div class="grid" id="grid"></div>
+      <p class="empty" id="empty" hidden>Select a standard to see the proofs an examiner will ask for.</p>
+      <p class="note" id="agents" hidden>Agents use the same proofs. Invocation and record access → Event Monitoring and Field Audit Trail. Restore → Backup &amp; Recover. Fields in the agent's context → Platform Encryption. Keeping the history → Archive.</p>
+    </div>
+  </main>
+  <script>
+    const standards = [
+      { id: "soc2", label: "SOC 2" },
+      { id: "iso", label: "ISO 27001" },
+      { id: "nist", label: "NIST 800-53" },
+      { id: "hipaa", label: "HIPAA" },
+      { id: "pci", label: "PCI DSS" },
+      { id: "gdpr", label: "GDPR" },
+      { id: "sox", label: "SOX" },
+      { id: "sec", label: "SEC / FINRA" },
+      { id: "ins", label: "Cyber insurance" }
+    ];
+
+    const cards = [
+      {
+        area: "Access",
+        product: "Event Monitoring",
+        title: "Who accessed or exported what",
+        value: "Walk into the audit with a user, API, and report-export timeline — not a sentence that says you log everything.",
+        standards: {
+          soc2: { cite: "CC6.1 Logical access", ask: "User, API, and report-export activity for the audit window." },
+          iso: { cite: "A.8.2, A.8.5 Access and authentication", ask: "Who authenticated, from where, including failures." },
+          nist: { cite: "AC-2, AU-2 Account use and auditable events", ask: "Privileged access and account-use log you can export." },
+          hipaa: { cite: "164.312(b) Audit controls", ask: "Who accessed ePHI in the org." },
+          pci: { cite: "10.2 Audit trail", ask: "Access to cardholder data, including list views and exports." },
+          gdpr: { cite: "Art. 5(2), 32 Accountability and security", ask: "Who accessed personal data, for a request or a breach." },
+          sox: { cite: "ITGC access to financial reporting", ask: "Who ran financial reports and who changed access." },
+          ins: { cite: "SaaS access-logging question", ask: "90+ days of tenant access. A policy PDF does not count." }
+        }
+      },
+      {
+        area: "Change",
+        product: "Shield Field Audit Trail",
+        title: "What changed, and who changed it",
+        value: "Show the prior value, the user, and the timestamp for the full audit window — past the 18 months standard history keeps.",
+        standards: {
+          soc2: { cite: "CC7.1, CC8.1 Detection and change", ask: "Field and setup changes with user and time." },
+          iso: { cite: "A.8.9, A.8.32 Configuration and change", ask: "Before and after on the fields in scope." },
+          nist: { cite: "CM-3 Configuration change control", ask: "Retained history of data and configuration change." },
+          hipaa: { cite: "164.312(b), 164.312(c) Audit and integrity", ask: "Who changed a clinical or billing field, and the prior value." },
+          pci: { cite: "10.2, 10.5 Changes retained and protected", ask: "Admin and data changes kept at least 12 months." },
+          gdpr: { cite: "Art. 5(1)(f) Integrity", ask: "A durable change history for personal data." },
+          sox: { cite: "ITGC change management", ask: "Who changed amount, stage, owner, or close fields." }
+        }
+      },
+      {
+        area: "Confidentiality",
+        product: "Shield Platform Encryption",
+        title: "What is encrypted, and who holds the keys",
+        value: "Name the fields and the key owner. \"Salesforce encrypts\" fails the follow-up.",
+        standards: {
+          soc2: { cite: "CC6.1, CC6.7 Confidentiality", ask: "Which fields are encrypted, and who holds the keys." },
+          iso: { cite: "A.8.24 Cryptography", ask: "Scope, and a named key custodian." },
+          nist: { cite: "SC-12, SC-13, SC-28 Cryptographic protection", ask: "Customer-controlled keys on named fields at rest." },
+          hipaa: { cite: "164.312(a)(2)(iv) Encryption", ask: "ePHI fields encrypted, key access listed." },
+          pci: { cite: "Requirement 3 Protect stored account data", ask: "Account data encrypted, keys separated from the data." },
+          gdpr: { cite: "Art. 32 Security of processing", ask: "Personal-data fields and who controls the keys." },
+          ins: { cite: "Data-at-rest question", ask: "A field list plus the key owner." }
+        }
+      },
+      {
+        area: "Posture",
+        product: "Security Center",
+        title: "Settings match the baseline, including across orgs",
+        value: "One view of session, password, connected-app, and guest-user health — instead of a screenshot from each org.",
+        standards: {
+          soc2: { cite: "CC6.6, CC7.1 Boundary and drift", ask: "Security settings versus baseline, across orgs." },
+          iso: { cite: "A.5.36, A.8.9 Policy and configuration", ask: "Health of session, password, connected app, and guest user settings." },
+          nist: { cite: "CM-6, CA-7 Baseline and continuous monitoring", ask: "Drift from the security baseline, not a point-in-time screenshot." },
+          pci: { cite: "2.2 Secure configuration", ask: "Hardening settings evidenced per in-scope org." },
+          ins: { cite: "SaaS misconfiguration question", ask: "How tenant misconfiguration is monitored." }
+        }
+      },
+      {
+        area: "Recovery",
+        product: "Backup & Recover",
+        title: "If it's gone, how fast it comes back",
+        value: "A dated restore test with an RPO and RTO. The recycle bin is not a test. Platform disaster recovery is not your data.",
+        standards: {
+          soc2: { cite: "A1.2 Recovery", ask: "Last restore test, RPO, and RTO." },
+          iso: { cite: "A.8.13 Information backup", ask: "Backup scope, frequency, and a restore sample." },
+          nist: { cite: "CP-9, CP-10 Backup and recovery", ask: "A dated restore of the objects in scope." },
+          hipaa: { cite: "164.308(a)(7) Contingency plan", ask: "ePHI backup and a tested restore." },
+          pci: { cite: "Incident recovery", ask: "A path back for cardholder data." },
+          ins: { cite: "Ransomware / destruction question", ask: "An isolated backup and a tested restore." }
+        }
+      },
+      {
+        area: "Retention",
+        product: "Archive",
+        title: "Produce the record years later",
+        value: "Pull a record at the far end of the policy — after it has left the live org — and show you can delete on schedule too.",
+        standards: {
+          iso: { cite: "A.5.33 Protection of records", ask: "A record still retrievable at the policy horizon." },
+          sec: { cite: "SEC 17a-4 / FINRA books and records", ask: "Records kept for the statutory period and still producible." },
+          hipaa: { cite: "164.530(j) Documentation retention", ask: "Required documentation retrievable for 6 years." },
+          gdpr: { cite: "Art. 5(1)(e) Storage limitation", ask: "Both keep-until and delete-after, defensible." },
+          sox: { cite: "Financial record retention", ask: "Closed-period records you can still query." },
+          soc2: { cite: "Retention committed in the report", ask: "Records still retrievable for the window you promised." }
+        }
+      }
+    ];
+
+    const chips = document.getElementById("chips");
+    const grid = document.getElementById("grid");
+    const empty = document.getElementById("empty");
+    const agents = document.getElementById("agents");
+    let current = null;
+
+    standards.forEach((s) => {
+      const b = document.createElement("button");
+      b.className = "chip";
+      b.type = "button";
+      b.textContent = s.label;
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", () => select(s.id, b));
+      chips.appendChild(b);
+    });
+
+    function select(id, button) {
+      current = id;
+      [...chips.children].forEach((c) => c.setAttribute("aria-pressed", "false"));
+      button.setAttribute("aria-pressed", "true");
+      render();
+    }
+
+    function render() {
+      grid.innerHTML = "";
+      const matches = cards.filter((c) => c.standards[current]);
+      empty.hidden = matches.length > 0;
+      agents.hidden = !current;
+      matches.forEach((c) => {
+        const spec = c.standards[current];
+        const el = document.createElement("article");
+        el.className = "card";
+        el.innerHTML =
+          '<div class="card-top"><div class="area"></div><div class="product"></div></div>' +
+          "<h3></h3><p class=\"cite\"></p><p class=\"value\"></p><div class=\"ask\"></div>";
+        el.querySelector(".area").textContent = c.area;
+        el.querySelector(".product").textContent = c.product;
+        el.querySelector("h3").textContent = c.title;
+        el.querySelector(".cite").textContent = spec.cite;
+        el.querySelector(".value").textContent = c.value;
+        el.querySelector(".ask").innerHTML = "<span>They will ask: </span>" + spec.ask;
+        grid.appendChild(el);
+      });
+    }
+  </script>
+</body>
+</html>
